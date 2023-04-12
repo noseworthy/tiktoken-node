@@ -7,10 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [windows-2022, ubuntu-20.04, macos-11]
+        target: [x86_64-pc-windows-msvc, x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-apple-darwin, aarch64-apple-darwin]
 
     steps:
       - uses: actions/checkout@v3
@@ -25,10 +25,12 @@ jobs:
         with:
           toolchain: stable
           override: true
+          target: ${{ matrix.target }}
+
+      - run: cargo install cargo-xwin
 
       - name: Check formatting
         uses: actions-rs/cargo@v1
-        if: runner.os == 'linux'
         with:
           command: fmt
           args: --all -- --check
@@ -36,7 +38,7 @@ jobs:
       - name: Build
         run: |
           npm i
-          npm run build
+          npm run build --target ${{ matrix.targets }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
